@@ -1,3 +1,9 @@
 <Solution>
-  <Project Path="EducationSystem.Presentation/CourseManager.csproj" />
+  <Folder Name="/backend/">
+    <Project Path="CourseManager.Application/CourseManager.Application.csproj" />
+    <Project Path="CourseManager.Domain/CourseManager.Domain.csproj" />
+    <Project Path="CourseManager.Infrastructure/CourseManager.Infrastructure.csproj" />
+    <Project Path="CourseManager.Presentation/CourseManager.Presentation.csproj" />
+    <Project Path="CourseManager.Tests/CourseManager.Tests.csproj" />
+  </Folder>
 </Solution>
