@@ -7,15 +7,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="backend\CourseManager.Application\Services\" />
-    <Folder Include="backend\CourseManager.Domain\Entities\" />
-    <Folder Include="backend\CourseManager.Domain\Interfaces\" />
-    <Folder Include="backend\CourseManager.Infrastructure\Data\" />
-    <Folder Include="backend\CourseManager.Infrastructure\Repositories\" />
-    <Folder Include="backend\CourseManager.Presentation\" />
-    <Folder Include="backend\CourseManager.Tests\" />
-    <Folder Include="backend\" />
-  </ItemGroup>
-
 </Project>
