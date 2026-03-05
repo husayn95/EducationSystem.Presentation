@@ -5,7 +5,19 @@ using CourseManager.Domain.Interfaces;
 using CourseManager.Application.Services;
 using CourseManager.Domain.Entities;
 
+
 var builder = WebApplication.CreateBuilder(args);
+
+//CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+});
+
+
 
 //Registrerar SQLite databas
 //Entity Framework skapar automatiskt databasen
@@ -18,8 +30,9 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 
 //registrerar service i DI container
 builder.Services.AddScoped<CourseService>();
-
 var app = builder.Build();
+
+app.UseCors("AllowAll");
 
 //skapar databasen automatiskt första gången programmet startas
 using (var scope = app.Services.CreateScope())
