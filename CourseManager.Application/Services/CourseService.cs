@@ -1,40 +1,70 @@
 ﻿using CourseManager.Domain.Entities;
 using CourseManager.Domain.Interfaces;
-
 namespace CourseManager.Application.Services;
 
-//Här finns logiken som använder repository
+/*
+Service-lagret innehåller affärslogik mellan API och repository.
+*/
+
 public class CourseService
 {
     private readonly ICourseRepository _repository;
 
-    //Repository sprutas in via dependency injection
     public CourseService(ICourseRepository repository)
     {
         _repository = repository;
     }
 
-    //hämtar alla kurser
+    // Hämtar alla kurser
     public List<Course> GetCourses()
     {
         return _repository.GetAll();
     }
 
-    //gör en ny kurs
+    // Skapar en ny kurs
     public Course CreateCourse(Course course)
     {
-        return _repository.Add(course);
+        if (string.IsNullOrWhiteSpace(course.Title))
+            throw new ArgumentException("Kursnamn får inte vara tomt");
+
+        // Skapar kursen
+        var createdCourse = _repository.Add(course);
+
+        // Om kursen har ett kurstillfälle kopplat
+        if (course.CourseInstances != null && course.CourseInstances.Any())
+        {
+            foreach (var instance in course.CourseInstances)
+            {
+                instance.CourseId = createdCourse.Id;
+            }
+        }
+
+        return createdCourse;
     }
 
-    //uppdaterar en kurs
-    public Course UpdateCourse(int id, Course course)
+    // Uppdaterar kurs
+    public Course UpdateCourse(int id, Course updatedCourse)
     {
-        return _repository.Update(id, course);
+        var existingCourse = _repository.GetById(id);
+
+        if (existingCourse == null)
+            return null;
+
+        existingCourse.Title = updatedCourse.Title;
+
+        return _repository.Update(existingCourse);
     }
 
-    //tar bort en kurs
-    public void DeleteCourse(int id)
+    // Tar bort kurs
+    public bool DeleteCourse(int id)
     {
+        var course = _repository.GetById(id);
+
+        if (course == null)
+            return false;
+
         _repository.Delete(id);
+
+        return true;
     }
 }

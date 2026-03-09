@@ -1,14 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CourseManager.Application.Services;
+using CourseManager.Domain.Entities;
+using CourseManager.Domain.Interfaces;
 using CourseManager.Infrastructure.Data;
 using CourseManager.Infrastructure.Repositories;
-using CourseManager.Domain.Interfaces;
-using CourseManager.Application.Services;
-using CourseManager.Domain.Entities;
-
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//CORS
+
+
+// CORS
+// Tillåter frontend (React) att kommunicera med backend
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -19,50 +22,100 @@ builder.Services.AddCors(options =>
 
 
 
-//Registrerar SQLite databas
-//Entity Framework skapar automatiskt databasen
+// Konfigurerar JSON så att cirkulära referenser ignoreras
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
+
+
+
+// Registrerar SQLite databas
+// Entity Framework skapar automatiskt databasen
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=courses.db"));
 
-//Dependency Injection
-//Här kopplas interface till implementation
+
+
+// Dependency Injection
+// Kopplar interface till implementation
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 
-//registrerar service i DI container
+
+
+// Registrerar service i DI container
 builder.Services.AddScoped<CourseService>();
+
+
+
 var app = builder.Build();
 
+
+
+// Aktiverar CORS
 app.UseCors("AllowAll");
 
-//skapar databasen automatiskt första gången programmet startas
+
+
+// Skapar databasen automatiskt första gången programmet startas
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
 }
 
-//API endpoint som hämtar alla kurser
+
+
+// API endpoint som hämtar alla kurser
 app.MapGet("/courses", (CourseService service) =>
 {
-    return service.GetCourses();
+    var courses = service.GetCourses();
+
+    // Returnerar HTTP 200 OK
+    return Results.Ok(courses);
 });
 
-//API endpoint för att skapa en kurs
+
+
+// API endpoint för att skapa en kurs
 app.MapPost("/courses", (CourseService service, Course course) =>
 {
-    return service.CreateCourse(course);
+    var createdCourse = service.CreateCourse(course);
+
+    // Returnerar HTTP 201 Created
+    return Results.Created($"/courses/{createdCourse.Id}", createdCourse);
 });
 
-//API endpoint för att uppdatera en kurs
-app.MapPut("/courses/{id}", (CourseService service, int id, Course course) =>
+
+
+// API endpoint för att uppdatera en kurs
+app.MapPut("/courses/{id}", (CourseService service, int id, Course updatedCourse) =>
 {
-    return service.UpdateCourse(id, course);
+    var result = service.UpdateCourse(id, updatedCourse);
+
+    // Om kursen inte finns
+    if (result == null)
+        return Results.NotFound();
+
+    // Annars returneras 200 OK
+    return Results.Ok(result);
 });
 
-//API endpoint för att ta bort en kurs
+
+
+// API endpoint för att ta bort en kurs
 app.MapDelete("/courses/{id}", (CourseService service, int id) =>
 {
-    service.DeleteCourse(id);
+    var deleted = service.DeleteCourse(id);
+
+    // Om kursen inte finns
+    if (!deleted)
+        return Results.NotFound();
+
+    // Returnerar 204 No Content
+    return Results.NoContent();
 });
+
+
 
 app.Run();

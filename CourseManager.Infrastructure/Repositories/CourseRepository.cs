@@ -4,61 +4,57 @@ using CourseManager.Infrastructure.Data;
 
 namespace CourseManager.Infrastructure.Repositories;
 
-//Denna klass sparar och läser data från databasen
+/*
+ Repository ansvarar för all databasaccess
+ för Course-entiteten.
+*/
 public class CourseRepository : ICourseRepository
 {
     private readonly AppDbContext _context;
 
-    //konstruktor som tar emot DbContext via dependency injection
     public CourseRepository(AppDbContext context)
     {
         _context = context;
     }
 
-    //hämtar alla kurser från databasen
+    // Hämtar alla kurser
     public List<Course> GetAll()
     {
         return _context.Courses.ToList();
     }
 
-    //Lägger till en ny kurs i databasen
+    // Hämtar en kurs baserat på id
+    public Course GetById(int id)
+    {
+        return _context.Courses.FirstOrDefault(c => c.Id == id);
+    }
+
+    // Lägger till en ny kurs
     public Course Add(Course course)
     {
         _context.Courses.Add(course);
-
-        //Sparar ändringar i databasen
         _context.SaveChanges();
 
         return course;
     }
 
-    //uppdaterar en befintlig kurs
-    public Course Update(int id, Course updated)
+    // Uppdaterar en kurs
+    public Course Update(Course course)
     {
-        // Hitta kursen i databasen
-        var course = _context.Courses.Find(id);
-
-        if (course == null)
-            return null;
-
-        // Uppdaterar värden
-        course.Title = updated.Title;
-        course.Teacher = updated.Teacher;
-
+        _context.Courses.Update(course);
         _context.SaveChanges();
 
         return course;
     }
 
-    //Tar bort en kurs från databasen
+    // Tar bort en kurs
     public void Delete(int id)
     {
-        var course = _context.Courses.Find(id);
+        var course = _context.Courses.FirstOrDefault(c => c.Id == id);
 
         if (course != null)
         {
             _context.Courses.Remove(course);
-
             _context.SaveChanges();
         }
     }

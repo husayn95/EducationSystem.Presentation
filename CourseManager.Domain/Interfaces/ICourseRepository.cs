@@ -1,20 +1,24 @@
 ﻿using CourseManager.Domain.Entities;
-
 namespace CourseManager.Domain.Interfaces;
 
-//Domain definierar vad som ska göras med data
-//men inte hur datan lagras
+/*
+ Interface för repository som hanterar databasoperationer
+ för Course-entiteten.
+*/
 public interface ICourseRepository
 {
-    //Hämtar alla kurser från databasen
+    // Hämtar alla kurser
     List<Course> GetAll();
 
-    //lägger till en ny kurs
+    // Hämtar en specifik kurs baserat på id
+    Course GetById(int id);
+
+    // Lägger till en ny kurs
     Course Add(Course course);
 
-    //uppdaterar en kurs
-    Course Update(int id, Course course);
+    // Uppdaterar en kurs
+    Course Update(Course course);
 
-    //Tar bort en kurs
+    // Tar bort en kurs
     void Delete(int id);
 }

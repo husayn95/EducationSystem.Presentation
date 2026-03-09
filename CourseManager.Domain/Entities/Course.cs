@@ -1,16 +1,13 @@
 ﻿namespace CourseManager.Domain.Entities;
 
-//Entity som representerar en kurs i systemet
-//Domain innehåller endast data och affärsregler
 public class Course
 {
-    //Primärnyckel i databasen.
-    //EF Core använder denna automatiskt som ID
     public int Id { get; set; }
 
-    //Namnet på kursen
-    public string Title { get; set; }
+    public string Title { get; set; } = string.Empty;
 
-    //namnet på läraren som håller kursen
-    public string Teacher { get; set; }
+    // TEMPORÄR lösning för frontend
+    public string Teacher { get; set; } = string.Empty;
+
+    public List<CourseInstance> CourseInstances { get; set; } = new();
 }
